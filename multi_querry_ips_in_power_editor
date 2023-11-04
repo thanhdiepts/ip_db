@@ -1,0 +1,18 @@
+(Page as number) as table =>
+let
+    Source = Web.Page(Web.Contents("https://en.ipshu.com/ip-country/VN?page="& Number.ToText(Page))),
+    Data0 = Source{0}[Data],
+    #"Changed Type" = Table.TransformColumnTypes(Data0,{{"Start IP", type text}, {"End IP", type text}, {"Number of IP", Int64.Type}, {"Location", type text}})
+in
+    #"Changed Type"
+
+let
+    Source = {0..31},
+    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Renamed Columns" = Table.RenameColumns(#"Converted to Table",{{"Column1", "Page"}}),
+    #"Added Custom" = Table.AddColumn(#"Renamed Columns", "Custom", each A([Page])),
+    #"Expanded Custom" = Table.ExpandTableColumn(#"Added Custom", "Custom", {"Start IP", "End IP"}, {"Custom.Start IP", "Custom.End IP"})
+in
+    #"Expanded Custom"
+	
+=[@[Custom.Start IP]]&"-"&[@[Custom.End IP]]
