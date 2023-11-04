@@ -13,8 +13,9 @@ let
     #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
     #"Renamed Columns" = Table.RenameColumns(#"Converted to Table",{{"Column1", "Page"}}),
     #"Added Custom" = Table.AddColumn(#"Renamed Columns", "Custom", each A([Page])),
-    #"Expanded Custom" = Table.ExpandTableColumn(#"Added Custom", "Custom", {"Start IP", "End IP"}, {"Custom.Start IP", "Custom.End IP"})
+    #"Expanded Custom" = Table.ExpandTableColumn(#"Added Custom", "Custom", {"Start IP", "End IP"}, {"Custom.Start IP", "Custom.End IP"}),
+    #"Removed Columns" = Table.RemoveColumns(#"Expanded Custom",{"Page"})
 in
-    #"Expanded Custom"
+    #"Removed Columns"
 	
 =[@[Custom.Start IP]]&"-"&[@[Custom.End IP]]
