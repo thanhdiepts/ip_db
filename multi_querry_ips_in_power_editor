@@ -1,3 +1,5 @@
+https://adatis.co.uk/loop-through-multiple-web-pages-using-power-query/
+
 (Page as number) as table =>
 let
     Source = Web.Page(Web.Contents("https://en.ipshu.com/ip-country/VN?page="& Number.ToText(Page))),
