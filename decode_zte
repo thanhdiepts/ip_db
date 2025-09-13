@@ -1,0 +1,99 @@
+unsigned int CspHardCodeParamGet(char *param_1,char *param_2,int param_3)
+
+{
+  size_t len_etchardcodefile;
+  __pid_t processID;
+  long lVar1;
+  FILE *__stream;
+  char *read_res;
+  int counter_21;
+  int counter_39;
+  int iVar2;
+  int iterator2;
+  int iterator_decryptresult;
+  char acStack_2b8 [36];
+  char acStack_294 [36];
+  char local_270 [36];
+  char local_24c [36];
+  char acStack_228 [256];
+  char read_buffer [64];
+  char auStack_e8 [196];
+  char iterated_char;
+  printf("Welcome to paramget\n");
+  memset(acStack_228,0,0x100);
+  memset(acStack_2b8,0,0x21);
+  memset(acStack_294,0,0x21);
+  printf("Are there arguments... %b\n", ((param_1 != (char *)0x0 && (param_3 != 0 && param_2 != (char *)0x0))));
+  printf("Is there a file... %b\n", (len_etchardcodefile = strlen(param_2), len_etchardcodefile != 0));
+  printf("Was the file %s readable... %b\n", strstr(param_1,"/etc/hardcodefile/"), (read_res = strstr(param_1,"/etc/hardcodefile/"), read_res != (char *)0x0));
+  if (((param_1 != (char *)0x0 && (param_3 != 0 && param_2 != (char *)0x0)) && (len_etchardcodefile = strlen(param_2), len_etchardcodefile != 0)) && (read_res = strstr(param_1,"/etc/hardcodefile/"), read_res != (char *)0x0)) {
+    printf("Execution has started\n");
+    len_etchardcodefile = strlen("/etc/hardcodefile/");
+    processID = getpid();
+//    lVar1 = syscall(0xe0);
+    snprintf(acStack_228,0x100,"%s%s%d%lu%s","/var/tmp/",read_res + len_etchardcodefile,processID,
+             lVar1,"-decry");
+    memset(local_270,0,0x21);
+    memset(local_24c,0,0x21);
+    memset(read_buffer,0,0x100);
+    __stream = fopen("/etc/hardcode","r");
+    if (__stream != (FILE *)0x0) {
+      read_res = fgets(read_buffer,0x100,__stream);
+      if (read_res == (char *)0x0) {
+        fclose(__stream);
+      }
+      else {
+        fclose(__stream);
+        iterator_decryptresult = 0;
+        do {
+          iterated_char = read_buffer[iterator_decryptresult];
+                    /* If we have a carriage return or newline, make that byte a 00 */
+          if (iterated_char == '\r' || iterated_char == '\n') {
+            read_buffer[iterator_decryptresult] = '\0';
+            break;
+          }
+          iterator_decryptresult = iterator_decryptresult + 1;
+        } while (iterator_decryptresult != 0x100);
+        iterator2 = 0;
+        iterator_decryptresult = 0;
+        iVar2 = 0;
+                    /* Read the hardcode.. key? */
+        do {
+                    /* If less than 21 */
+          counter_21 = iterator_decryptresult;
+          if (iterator2 - 5U < 0x10) {
+            counter_21 = iterator_decryptresult + 1;
+            local_270[iterator_decryptresult] = read_buffer[iterator2] + '\x03';
+          }
+                    /* If less than 39 */
+          counter_39 = iVar2;
+          if (iterator2 - 7U < 0x20) {
+            counter_39 = iVar2 + 1;
+            local_24c[iVar2] = read_buffer[iterator2] + '\x01';
+          }
+          iterator2 = iterator2 + 1;
+          iterator_decryptresult = counter_21;
+          iVar2 = counter_39;
+        } while (iterator2 != 0x40);
+        snprintf(acStack_2b8,0x21,"%s%s",local_270,auStack_e8);
+        snprintf(acStack_294,0x21,"%s",local_24c);
+        printf("OK\n");
+        printf("228 temporary FIFO: %s\n2b8 recoded magic: %s\n294 decoded IV: %s\n", acStack_228, acStack_2b8, acStack_294);
+        //iterator_decryptresult = CspHardCodeDecry(param_1,acStack_228,acStack_2b8,acStack_294);
+/*        if (iterator_decryptresult == 0) {
+          //iterator_decryptresult = CspHCReadParam(acStack_228,param_2,param_3,param_4);
+          if (iterator_decryptresult == 0) {
+            unlink(acStack_228);
+            return 0;
+          }*/
+          unlink(acStack_228);
+        }
+      }
+    }
+  return 0xffffffff;
+}
+
+int main(){
+        CspHardCodeParamGet("/etc/hardcodefile/dataprotocol","dataprotocol",1);
+        return 0;
+}
