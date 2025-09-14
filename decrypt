@@ -1,0 +1,44 @@
+from struct import unpack
+import glob
+
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
+
+
+def decrypt():
+    key_file = "./etc/hardcode"
+    config_paths = glob.glob("./etc/hardcodefile/*")
+
+    with open(key_file, "rb") as f:
+        key_data = f.readline().strip()
+    offset_bytes = lambda data, offset: bytes(b + offset for b in data)
+
+    key = SHA256.new(offset_bytes(key_data[5:21], 3) + key_data[64:]).digest()
+    iv = SHA256.new(offset_bytes(key_data[7:39], 1)).digest()[:16]
+
+    for path in config_paths:
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        try:
+            with open(path, "rb") as config:
+                print(f"Decrypting {path}")
+                header = config.read(8)
+                magic1, magic2 = unpack(">II", header)
+                if magic1 != 0x01020304 or magic2 != 0x00000003:
+                    print(f"{path} is not a valid config file, skipping")
+                    continue
+                config.read(52)
+                with open(f"{path}.decrypted.txt", "wb") as output:
+                    while True:
+                        chunk_header = config.read(12)
+                        if not chunk_header:
+                            break
+                        plain_len, cipher_len, eof = unpack(">III", chunk_header)
+                        plaintext = cipher.decrypt(config.read(cipher_len))[:plain_len]
+                        output.write(plaintext)
+                        if not eof:
+                            break
+        except FileNotFoundError:
+            print(f"File {path} not found, skipping")
+
+if __name__ == "__main__":
+    decrypt()
